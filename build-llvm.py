@@ -143,6 +143,15 @@ def parse_parameters(root_folder):
                         """),
                         type=str,
                         default="ClangBuiltLinux")
+    parser.add_argument("-d",
+                        "--dylib",
+                        help=textwrap.dedent("""\
+                        Enable dylib linking. This causes llvm and clang tools to link against libllvm
+                        and libclang respectively, instead of the individual component libraries.
+                        This saves some storage space.
+
+                        """),
+                        action="store_true")
     parser.add_argument("-i",
                         "--incremental",
                         help=textwrap.dedent("""\
@@ -272,6 +281,15 @@ def parse_parameters(root_folder):
 
                              """),
                              action="store_true")
+    parser.add_argument("-r",
+                        "--rtti",
+                        help=textwrap.dedent("""\
+                        Enable run-time type information, which is a feature of the C++ programming language
+                        that exposes information about an object's data type at runtime.
+                        Some applications and tools require RTTI to build.
+
+                        """),
+                        action="store_true")
     clone_options.add_argument("-s",
                                "--shallow-clone",
                                help=textwrap.dedent("""\
@@ -874,6 +892,15 @@ def build_cmake_defines(args, dirs, env_vars, stage):
     # Add the vendor string if necessary
     if args.clang_vendor:
         defines['CLANG_VENDOR'] = args.clang_vendor
+    
+    # Add RTTI if enabled
+    if args.rtti:
+        defines['LLVM_ENABLE_RTTI'] = 'ON'
+    
+    # Add dylib linking if enabled
+    if args.dylib:
+        defines['LLVM_LINK_LLVM_DYLIB=ON'] = 'ON'
+        defines['CLANG_LINK_CLANG_DYLIB=ON'] = 'ON' 
 
     return defines
 
